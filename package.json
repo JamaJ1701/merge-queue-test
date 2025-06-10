@@ -1,0 +1,14 @@
+{
+    "name": "my-monorepo",
+    "version": "1.0.0",
+    "private": true,
+    "description": "A test monorepo for Changesets with Merge Queue",
+    "scripts": {
+        "build": "pnpm --filter './packages/**' build",
+        "test": "pnpm --filter './packages/**' test",
+        "changeset": "changeset"
+    },
+    "devDependencies": {
+        "@changesets/cli": "^2.27.1"
+    }
+}

@@ -1,0 +1,16 @@
+{
+    "name": "@my-monorepo/ui",
+    "version": "1.0.0",
+    "description": "UI components package",
+    "main": "index.js",
+    "scripts": {
+        "build": "echo 'Building UI...'",
+        "test": "echo 'Testing UI...'"
+    },
+    "dependencies": {
+        "@my-monorepo/core": "workspace:^"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}

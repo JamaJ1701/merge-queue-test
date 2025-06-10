@@ -1,0 +1,13 @@
+{
+    "name": "@my-monorepo/core",
+    "version": "1.0.0",
+    "description": "Core utilities package",
+    "main": "index.js",
+    "scripts": {
+        "build": "echo 'Building Core...'",
+        "test": "echo 'Testing Core...'"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC"
+}

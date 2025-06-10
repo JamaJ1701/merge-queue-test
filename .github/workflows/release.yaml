@@ -1,0 +1,79 @@
+name: Release / Version Bump
+
+on:
+    # The key change: Trigger on merge_group instead of push to main
+    merge_group:
+        branches: [main]
+
+jobs:
+    version:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write # Needed for git push and tag
+            pull-requests: write # Recommended for creating GitHub releases if you add that
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Important for Changesets to determine next version
+                  token: ${{ secrets.GITHUB_TOKEN }} # Use default token for push
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v3
+              with:
+                  version: 8
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Configure Git
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "github-actions[bot]@users.noreply.github.com"
+
+            - name: Bump versions and Push Changes
+              id: versioning
+              run: |
+                  # This command reads .changeset files, updates versions, and removes the .changeset files
+                  pnpm changeset version
+
+                  # Check if there are any changes to commit (i.e., if a version bump actually occurred)
+                  if ! git diff --quiet HEAD; then
+                    echo "::set-output name=changes_present::true"
+                    # Get the new version from a package that's expected to be bumped (e.g., your root or a central package)
+                    # Adjust this if your root package.json doesn't get a version bump
+                    NEW_VERSION=$(node -p "require('./package.json').version") 
+
+                    git add .
+                    git commit -m "chore: release packages v$NEW_VERSION [skip ci]"
+                    git push
+
+                    # Create and push a Git tag for the new version
+                    git tag "v$NEW_VERSION"
+                    git push origin "v$NEW_VERSION"
+
+                    echo "Version bumped to $NEW_VERSION and pushed."
+                  else
+                    echo "::set-output name=changes_present::false"
+                    echo "No version changes detected by Changesets."
+                  fi
+              # If you were to run `pnpm changeset publish` here, ensure it doesn't also push.
+              # It's generally better to let `changeset version` do the local file updates/commit,
+              # and then `changeset publish` just handles the actual npm registry part.
+              # Or you can have `changeset publish` also handle the git push/tag,
+              # but ensure your workflow only triggers the publish if necessary.
+
+            - name: Publish packages (Optional - only if versioning happened)
+              if: steps.versioning.outputs.changes_present == 'true'
+              run: |
+                  # This is where `pnpm changeset publish` would go.
+                  # You might need to configure npm authentication for this.
+                  # Example: pnpm changeset publish --tag latest
+                  echo "Packages would be published here if configured."
+                  # For a real setup, ensure you have AUTH_TOKEN, etc. configured
+                  # Example: pnpm changeset publish --no-git-tag-version --registry https://registry.npmjs.org/
