@@ -29,10 +29,14 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Build packages
-              run: pnpm build
+              run: |
+                  pnpm build
+                  sleep 60
 
             - name: Run tests
-              run: pnpm test
+              run: |
+                  pnpm test
+                  sleep 120
 
             - name: Verify Changesets (Optional but recommended)
               # This step ensures that a .changeset file is present for new features/fixes
